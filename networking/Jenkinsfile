@@ -12,8 +12,8 @@ pipeline {
         PATH = "$TF_HOME:$PATH"
         DYNAMODB_STATELOCK = "gar-ddt-tfstatelock"
         NETWORKING_BUCKET = "gar-ddt-networking"
-        AWS_ACCESS_KEY = credentials('networking_access_key')
-        AWS_SECRET_KEY = credentials('networking_secret_key')
+        AWS_ACCESS_KEY = credentials('terraform_access_key')
+        AWS_SECRET_KEY = credentials('terraform_secret_key')
     }
     stages {
         stage('NetworkInit'){
