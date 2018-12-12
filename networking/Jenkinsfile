@@ -17,25 +17,6 @@ pipeline {
     agent none
 
 
-    
-    // tools {
-    //     "org.jenkinsci.plugins.terraform.TerraformInstallation" "terraform-0.11.8"
-    // }
-    // parameters {
-    //     string(name: 'WORKSPACE', defaultValue: 'development', description:'worspace to use in Terraform')
-    // }
-    // environment {
-    //     TF_HOME = tool('terraform-0.11.8')
-    //     TF_IN_AUTOMATION = "true"
-    //     PATH = "$TF_HOME:$PATH"
-    //     DYNAMODB_STATELOCK = "gar-ddt-tfstatelock"
-    //     NETWORKING_BUCKET = "gar-ddt-networking"
-    //     AWS_ACCESS_KEY = credentials('terraform_access_key')
-    //     AWS_SECRET_KEY = credentials('terraform_secret_key')
-    // }
-
-
-
   environment {
         // PATH = "$TF_HOME:$PATH"
         DYNAMODB_STATELOCK = "gar-ddt-tfstatelock"
@@ -51,6 +32,10 @@ pipeline {
     stages {
         stage('NetworkInit'){
 
+        when {
+            changeRequest target: 'master'
+        }
+
           agent {
             docker {
               image 'hashicorp/terraform:light'
@@ -60,6 +45,9 @@ pipeline {
 
             steps {
                     dir('networking/'){
+
+                    // Init
+
                         sh 'terraform --version'
 
                         // sh "terraform init -input=false -plugin-dir=/var/jenkins_home/terraform_plugins \
@@ -72,10 +60,10 @@ pipeline {
                         sh "whoami"
                     }
 
-            
-
-                    dir('networking/'){
                         script {
+
+                            // Plan
+
                             try {
                             sh "terraform workspace new ${params.WORKSPACE}"
                             } catch (err) {
@@ -85,32 +73,33 @@ pipeline {
                             sh "terraform plan -out terraform-networking.tfplan;echo \$? > status"                                
                             
                             stash name: "terraform-networking-plan", includes: "terraform-networking.tfplan"
-                        }
-                    }
 
-                    script{
-                        def apply = false
-                        try {
-                            input message: 'confirm apply', ok: 'Apply Config'
-                            apply = true
-                        } catch (err) {
-                            apply = false
-                            dir('networking'){                   
 
-                                sh "terraform destroy -force"         
 
+                            // Apply 
+                            
+                            def apply = false
+                            try {
+                                input message: 'confirm apply', ok: 'Apply Config'
+                                apply = true
+                            } catch (err) {
+                                apply = false
+                                dir('networking'){                   
+
+                                    sh "terraform destroy -force"         
+
+                                }
+                                currentBuild.result = 'UNSTABLE'
                             }
-                            currentBuild.result = 'UNSTABLE'
-                        }
-                        if(apply){
-                            dir('networking'){
-                                unstash "terraform-networking-plan"
-                                sh 'terraform apply terraform-networking.tfplan'
+                            if(apply){
+                                dir('networking'){
+                                    unstash "terraform-networking-plan"
+                                    sh 'terraform apply terraform-networking.tfplan'
+                                }
                             }
                         }
-                    }
 
-            }
+                }
         }
     }
 }
