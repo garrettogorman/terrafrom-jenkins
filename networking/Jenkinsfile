@@ -12,22 +12,16 @@ def PROJECT = [
   ]
 ]
 
+environment {
+    DYNAMODB_STATELOCK = "gar-ddt-tfstatelock"
+    NETWORKING_BUCKET = "gar-ddt-networking"
+    AWS_ACCESS_KEY = credentials('terraform_access_key')
+    AWS_SECRET_KEY = credentials('terraform_secret_key')
+    TF_VAR_project_name = "${PROJECT.name}"
+}
 
 pipeline {
     agent none
-
-
-  environment {
-        // PATH = "$TF_HOME:$PATH"
-        DYNAMODB_STATELOCK = "gar-ddt-tfstatelock"
-        NETWORKING_BUCKET = "gar-ddt-networking"
-        AWS_ACCESS_KEY = credentials('terraform_access_key')
-        AWS_SECRET_KEY = credentials('terraform_secret_key')
-        TF_VAR_project_name = "${PROJECT.name}"
-  }
-
-
-
 
     stages {
         stage('Terraform'){
@@ -36,16 +30,12 @@ pipeline {
         //     changeRequest target: 'master'
         // }
 
-          agent {
+        agent {
             docker {
-              image 'hashicorp/terraform:light'
-              args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+                image 'hashicorp/terraform:light'
+                args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
             }
-          }
-
-
-
-
+        }
 
             steps {
 
