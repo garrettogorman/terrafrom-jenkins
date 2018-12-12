@@ -31,7 +31,7 @@ module "vpc" {
   one_nat_gateway_per_az = false
 
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = "${new-terraform.workspace}"
   }
 }
 
