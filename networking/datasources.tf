@@ -1,12 +1,12 @@
-locals {
-  common_tags = {
-    environment      = "${data.external.configuration.result.environment}"
-    billing_code     = "${data.external.configuration.result.billing_code}"
-    project_code     = "${data.external.configuration.result.project_code}"
-    network_lead     = "${data.external.configuration.result.network_lead}"
-    application_lead = "${data.external.configuration.result.application_lead}"
-  }
-}
+# locals {
+#   common_tags = {
+#     environment      = "${data.external.configuration.result.environment}"
+#     billing_code     = "${data.external.configuration.result.billing_code}"
+#     project_code     = "${data.external.configuration.result.project_code}"
+#     network_lead     = "${data.external.configuration.result.network_lead}"
+#     application_lead = "${data.external.configuration.result.application_lead}"
+#   }
+# }
 
 data "template_file" "public_cidrsubnet" {
   count = "${data.external.configuration.result.vpc_subnet_count}"

@@ -32,5 +32,5 @@ module "vpc" {
 
   create_database_subnet_group = false
 
-  tags = "${local.common_tags}"
+  # tags = "${local.common_tags}"
 }
