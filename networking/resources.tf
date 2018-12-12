@@ -46,12 +46,12 @@ module "vpc" {
   private_subnets = "${data.template_file.private_cidrsubnet.*.rendered}"
   public_subnets  = "${data.template_file.public_cidrsubnet.*.rendered}"
 
-  enable_nat_gateway           = false
+  # enable_nat_gateway           = false
   create_database_subnet_group = false
 
-  enable_nat_gateway     = false
-  # single_nat_gateway     = false
-  # one_nat_gateway_per_az = false
+  enable_nat_gateway     = true
+  single_nat_gateway     = true
+  one_nat_gateway_per_az = false
 
   tags = {
     Environment = "${terraform.workspace}"
