@@ -3,7 +3,11 @@ def PROJECT = [
   infrastructure: [
     environments: [
       development: [
-        //   Add details
+            DYNAMODB_STATELOCK = "gar-ddt-tfstatelock"
+            NETWORKING_BUCKET = "gar-ddt-networking"
+            AWS_ACCESS_KEY = credentials('terraform_access_key')
+            AWS_SECRET_KEY = credentials('terraform_secret_key')
+            TF_VAR_project_name = "${PROJECT.name}"
       ],
       production: [
         //   Add details
@@ -12,13 +16,6 @@ def PROJECT = [
   ]
 ]
 
-environment {
-    DYNAMODB_STATELOCK = "gar-ddt-tfstatelock"
-    NETWORKING_BUCKET = "gar-ddt-networking"
-    AWS_ACCESS_KEY = credentials('terraform_access_key')
-    AWS_SECRET_KEY = credentials('terraform_secret_key')
-    TF_VAR_project_name = "${PROJECT.name}"
-}
 
 pipeline {
     agent none
