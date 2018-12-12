@@ -16,7 +16,7 @@ def PROJECT = [
 pipeline {
     agent none
 
-    environments {
+    environment {
 
         DYNAMODB_STATELOCK = "gar-ddt-tfstatelock"
         NETWORKING_BUCKET = "gar-ddt-networking"
