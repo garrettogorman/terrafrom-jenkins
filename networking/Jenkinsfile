@@ -4,7 +4,6 @@ pipeline {
         "org.jenkinsci.plugins.terraform.TerraformInstallation" "terraform-0.11.8"
     }
     parameters {
-        // string(name: 'LAMBDA_URL', defaultValue: '', description: 'URL to the Lamdba function')
         string(name: 'WORKSPACE', defaultValue: 'development', description:'worspace to use in Terraform')
     }
     environment {
@@ -19,11 +18,8 @@ pipeline {
     stages {
         stage('NetworkInit'){
             steps {
-                dir('module5/networking/'){
+                dir('networking/'){
                     sh 'terraform --version'
-                    // sh "terraform init -input=false -plugin-dir=/var/jenkins_home/terraform_plugins \
-                    //  --backend-config='dynamodb_table=$DYNAMODB_STATELOCK' --backend-config='bucket=$NETWORKING_BUCKET' \
-                    //  --backend-config='access_key=$NETWORKING_ACCESS_KEY' --backend-config='secret_key=$NETWORKING_SECRET_KEY'"
 
                     sh "terraform init -input=false -plugin-dir=/var/jenkins_home/terraform_plugins \
                     --backend-config='dynamodb_table=$DYNAMODB_STATELOCK' --backend-config='bucket=$NETWORKING_BUCKET'"
@@ -35,18 +31,13 @@ pipeline {
         }
         stage('NetworkPlan'){
             steps {
-                dir('module5/networking/'){
+                dir('networking/'){
                     script {
                         try {
                            sh "terraform workspace new ${params.WORKSPACE}"
                         } catch (err) {
                             sh "terraform workspace select ${params.WORKSPACE}"
-                        }
-                        // sh "terraform plan -var 'aws_access_key=$NETWORKING_ACCESS_KEY' -var 'aws_secret_key=$NETWORKING_SECRET_KEY' \
-                        // -var 'url=${params.LAMBDA_URL}' -out terraform-networking.tfplan;echo \$? > status"
-
-                        // sh "terraform plan -var 'aws_access_key=$NETWORKING_ACCESS_KEY' -var 'aws_secret_key=$NETWORKING_SECRET_KEY' \
-                        // -out terraform-networking.tfplan;echo \$? > status"                    
+                        }        
 
                         sh "terraform plan -out terraform-networking.tfplan;echo \$? > status"                                
                         
@@ -64,12 +55,7 @@ pipeline {
                         apply = true
                     } catch (err) {
                         apply = false
-                        dir('module5/networking'){
-                            // sh "terraform destroy -var 'aws_access_key=$NETWORKING_ACCESS_KEY' \
-                            //  -var 'aws_secret_key=$NETWORKING_SECRET_KEY' -var 'url=${params.LAMBDA_URL}' -force"
-
-                            // sh "terraform destroy -var 'aws_access_key=$NETWORKING_ACCESS_KEY' \
-                            //  -var 'aws_secret_key=$NETWORKING_SECRET_KEY' -force"                             
+                        dir('networking'){                   
 
                             sh "terraform destroy -force"         
 
@@ -77,7 +63,7 @@ pipeline {
                         currentBuild.result = 'UNSTABLE'
                     }
                     if(apply){
-                        dir('module5/networking'){
+                        dir('networking'){
                             unstash "terraform-networking-plan"
                             sh 'terraform apply terraform-networking.tfplan'
                         }
