@@ -30,11 +30,11 @@ pipeline {
 
 
     stages {
-        stage('NetworkInit'){
+        stage('Terraform'){
 
-        when {
-            changeRequest target: 'master'
-        }
+        // when {
+        //     changeRequest target: 'master'
+        // }
 
           agent {
             docker {
@@ -43,63 +43,61 @@ pipeline {
             }
           }
 
+
+
+
+
             steps {
-                    dir('networking/'){
 
                     // Init
 
+                    dir('networking/'){
+
+
                         sh 'terraform --version'
-
-                        // sh "terraform init -input=false -plugin-dir=/var/jenkins_home/terraform_plugins \
-                        // --backend-config='dynamodb_table=$DYNAMODB_STATELOCK' --backend-config='bucket=$NETWORKING_BUCKET'"
-
                         sh "terraform init \
                         --backend-config='dynamodb_table=$DYNAMODB_STATELOCK' --backend-config='bucket=$NETWORKING_BUCKET'"                    
-
                         sh "echo \$PWD"
                         sh "whoami"
                     }
 
-                        script {
+                    // Plan
+                    script {
+                        try {
+                        sh "terraform workspace new ${params.WORKSPACE}"
+                        } catch (err) {
+                            sh "terraform workspace select ${params.WORKSPACE}"
+                        }        
 
-                            // Plan
-
-                            try {
-                            sh "terraform workspace new ${params.WORKSPACE}"
-                            } catch (err) {
-                                sh "terraform workspace select ${params.WORKSPACE}"
-                            }        
-
-                            sh "terraform plan -out terraform-networking.tfplan;echo \$? > status"                                
+                        sh "terraform plan -out terraform-networking.tfplan;echo \$? > status"                                
                             
-                            stash name: "terraform-networking-plan", includes: "terraform-networking.tfplan"
+                        stash name: "terraform-networking-plan", includes: "terraform-networking.tfplan"
+                    }    
 
+                    // Apply 
+                    script {                            
+                        def apply = false
+                        try {
+                            input message: 'confirm apply', ok: 'Apply Config'
+                            apply = true
+                        } catch (err) {
+                            apply = false
+                            dir('networking'){                   
 
+                                sh "terraform destroy -force"         
 
-                            // Apply 
-                            
-                            def apply = false
-                            try {
-                                input message: 'confirm apply', ok: 'Apply Config'
-                                apply = true
-                            } catch (err) {
-                                apply = false
-                                dir('networking'){                   
-
-                                    sh "terraform destroy -force"         
-
-                                }
-                                currentBuild.result = 'UNSTABLE'
                             }
-                            if(apply){
-                                dir('networking'){
-                                    unstash "terraform-networking-plan"
-                                    sh 'terraform apply terraform-networking.tfplan'
-                                }
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                        if(apply){
+                            dir('networking'){
+                                unstash "terraform-networking-plan"
+                                sh 'terraform apply terraform-networking.tfplan'
                             }
                         }
+                    }
 
                 }
+            }
         }
     }
-}
