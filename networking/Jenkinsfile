@@ -1,22 +1,63 @@
+def PROJECT = [
+  name: 'test-vpc',
+  infrastructure: [
+    environments: [
+      development: [
+        //   Add details
+      ],
+      production: [
+        //   Add details
+      ]
+    ]
+  ]
+]
+
+
 pipeline {
-    agent any
-    tools {
-        "org.jenkinsci.plugins.terraform.TerraformInstallation" "terraform-0.11.8"
-    }
-    parameters {
-        string(name: 'WORKSPACE', defaultValue: 'development', description:'worspace to use in Terraform')
-    }
-    environment {
-        TF_HOME = tool('terraform-0.11.8')
-        TF_IN_AUTOMATION = "true"
+    agent none
+
+
+    
+    // tools {
+    //     "org.jenkinsci.plugins.terraform.TerraformInstallation" "terraform-0.11.8"
+    // }
+    // parameters {
+    //     string(name: 'WORKSPACE', defaultValue: 'development', description:'worspace to use in Terraform')
+    // }
+    // environment {
+    //     TF_HOME = tool('terraform-0.11.8')
+    //     TF_IN_AUTOMATION = "true"
+    //     PATH = "$TF_HOME:$PATH"
+    //     DYNAMODB_STATELOCK = "gar-ddt-tfstatelock"
+    //     NETWORKING_BUCKET = "gar-ddt-networking"
+    //     AWS_ACCESS_KEY = credentials('terraform_access_key')
+    //     AWS_SECRET_KEY = credentials('terraform_secret_key')
+    // }
+
+
+
+  environment {
         PATH = "$TF_HOME:$PATH"
         DYNAMODB_STATELOCK = "gar-ddt-tfstatelock"
         NETWORKING_BUCKET = "gar-ddt-networking"
         AWS_ACCESS_KEY = credentials('terraform_access_key')
         AWS_SECRET_KEY = credentials('terraform_secret_key')
-    }
+        TF_VAR_project_name = "${PROJECT.name}"
+  }
+
+
+
+
     stages {
         stage('NetworkInit'){
+
+          agent {
+            docker {
+              image 'hashicorp/terraform:light'
+              args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+            }
+          }
+
             steps {
                 dir('networking/'){
                     sh 'terraform --version'
@@ -29,7 +70,16 @@ pipeline {
                 }
             }
         }
+
         stage('NetworkPlan'){
+
+          agent {
+            docker {
+              image 'hashicorp/terraform:light'
+              args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+            }
+          }
+
             steps {
                 dir('networking/'){
                     script {
@@ -47,6 +97,14 @@ pipeline {
             }
         }
         stage('NetworkApply'){
+
+          agent {
+            docker {
+              image 'hashicorp/terraform:light'
+              args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+            }
+          }
+                      
             steps {
                 script{
                     def apply = false
