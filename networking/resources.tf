@@ -3,8 +3,8 @@
 ##################################################################################
 
 provider "aws" {
-  access_key = "${var.aws_access_key}"
-  secret_key = "${var.aws_secret_key}"
+  # access_key = "${var.aws_access_key}"
+  # secret_key = "${var.aws_secret_key}"
   region     = "eu-west-1"
 }
 
@@ -49,8 +49,8 @@ module "vpc" {
   enable_nat_gateway           = false
   create_database_subnet_group = false
 
-  enable_nat_gateway     = true
-  single_nat_gateway     = true
+  enable_nat_gateway     = false
+  single_nat_gateway     = false
   one_nat_gateway_per_az = false
 
   tags = {
