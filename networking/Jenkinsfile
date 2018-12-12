@@ -59,77 +59,57 @@ pipeline {
           }
 
             steps {
-                dir('networking/'){
-                    sh 'terraform --version'
+                    dir('networking/'){
+                        sh 'terraform --version'
 
-                    // sh "terraform init -input=false -plugin-dir=/var/jenkins_home/terraform_plugins \
-                    // --backend-config='dynamodb_table=$DYNAMODB_STATELOCK' --backend-config='bucket=$NETWORKING_BUCKET'"
+                        // sh "terraform init -input=false -plugin-dir=/var/jenkins_home/terraform_plugins \
+                        // --backend-config='dynamodb_table=$DYNAMODB_STATELOCK' --backend-config='bucket=$NETWORKING_BUCKET'"
 
-                    sh "terraform init \
-                    --backend-config='dynamodb_table=$DYNAMODB_STATELOCK' --backend-config='bucket=$NETWORKING_BUCKET'"                    
+                        sh "terraform init \
+                        --backend-config='dynamodb_table=$DYNAMODB_STATELOCK' --backend-config='bucket=$NETWORKING_BUCKET'"                    
 
-                    sh "echo \$PWD"
-                    sh "whoami"
-                }
-            }
-        }
+                        sh "echo \$PWD"
+                        sh "whoami"
+                    }
 
-        stage('NetworkPlan'){
+            
 
-          agent {
-            docker {
-              image 'hashicorp/terraform:light'
-              args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
-            }
-          }
+                    dir('networking/'){
+                        script {
+                            try {
+                            sh "terraform workspace new ${params.WORKSPACE}"
+                            } catch (err) {
+                                sh "terraform workspace select ${params.WORKSPACE}"
+                            }        
 
-            steps {
-                dir('networking/'){
-                    script {
+                            sh "terraform plan -out terraform-networking.tfplan;echo \$? > status"                                
+                            
+                            stash name: "terraform-networking-plan", includes: "terraform-networking.tfplan"
+                        }
+                    }
+
+                    script{
+                        def apply = false
                         try {
-                           sh "terraform workspace new ${params.WORKSPACE}"
+                            input message: 'confirm apply', ok: 'Apply Config'
+                            apply = true
                         } catch (err) {
-                            sh "terraform workspace select ${params.WORKSPACE}"
-                        }        
+                            apply = false
+                            dir('networking'){                   
 
-                        sh "terraform plan -out terraform-networking.tfplan;echo \$? > status"                                
-                        
-                        stash name: "terraform-networking-plan", includes: "terraform-networking.tfplan"
-                    }
-                }
-            }
-        }
-        stage('NetworkApply'){
+                                sh "terraform destroy -force"         
 
-          agent {
-            docker {
-              image 'hashicorp/terraform:light'
-              args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
-            }
-          }
-
-            steps {
-                script{
-                    def apply = false
-                    try {
-                        input message: 'confirm apply', ok: 'Apply Config'
-                        apply = true
-                    } catch (err) {
-                        apply = false
-                        dir('networking'){                   
-
-                            sh "terraform destroy -force"         
-
+                            }
+                            currentBuild.result = 'UNSTABLE'
                         }
-                        currentBuild.result = 'UNSTABLE'
-                    }
-                    if(apply){
-                        dir('networking'){
-                            unstash "terraform-networking-plan"
-                            sh 'terraform apply terraform-networking.tfplan'
+                        if(apply){
+                            dir('networking'){
+                                unstash "terraform-networking-plan"
+                                sh 'terraform apply terraform-networking.tfplan'
+                            }
                         }
                     }
-                }
+
             }
         }
     }
