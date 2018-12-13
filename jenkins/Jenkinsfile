@@ -1,5 +1,5 @@
 // Internal library imports
-@Library('terrafrom-jenkins@master') _
+@Library('garrettogorman/terrafrom-jenkins@master') _
 
 def PROJECT = [
   name: 'terrafrom-jenkins',
