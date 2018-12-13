@@ -34,7 +34,7 @@ pipeline {
 
   stages {
 
-        stage('Infrastructure') {
+        stage('infrastructure') {
           agent {
             docker {
               image 'hashicorp/terraform:light'
