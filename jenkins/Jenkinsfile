@@ -50,14 +50,14 @@ pipeline {
           }
 
           steps {
-            infrastructure('development', 'blueprint/')
+            infrastructure('development', 'blueprint')
           }
         }
   }
 
-  post {
-    failure {
-      controlledFailure()
-    }
-  }
+  // post {
+  //   failure {
+  //     controlledFailure()
+  //   }
+  // }
 }
