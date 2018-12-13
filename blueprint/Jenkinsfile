@@ -1,0 +1,57 @@
+// Internal library imports
+@Library('terrafrom-jenkins@master') _
+
+def PROJECT = [
+  name: 'terrafrom-jenkins',
+  infrastructure: [
+    environments: [
+      development: [
+          // Add variables
+      ],
+      production: [
+          // Add Variables
+      ]
+    ]
+  ]
+]
+
+pipeline {
+  agent none
+
+  environment {
+    SERVICE_NAME = "${PROJECT.name}"
+    AWS_REGION = 'eu-west-1'
+    AWS_ACCESS_KEY = credentials('terraform_access_key')
+    AWS_SECRET_KEY = credentials('terraform_secret_key')
+    TF_VAR_project_name = "${PROJECT.name}"
+  }
+
+  stages {
+
+        stage('Infrastructure') {
+          agent {
+            docker {
+              image 'hashicorp/terraform:light'
+              args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+            }
+          }
+
+          environment {
+                TF_VAR_projectcode = "8675309"
+                TF_VAR_vpc_cidr = "172.16.0.0/16"
+                TF_VAR_public_subnet_count = "2"
+                TF_VAR_private_subnet_count = "2"
+          }
+
+          steps {
+            infrastructure('development', 'blueprint/')
+          }
+        }
+  }
+
+  post {
+    failure {
+      controlledFailure()
+    }
+  }
+}
