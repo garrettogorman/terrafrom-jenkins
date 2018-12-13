@@ -1,10 +1,10 @@
 // Internal library imports
-// @Library('terrafrom-jenkins@master') _
+@Library('jenkins-shared-terraform@master') _
 
 
-library identifier: 'terrafrom-jenkins@master', retriever: modernSCM(
-  [$class: 'GitSCMSource',
-   remote: 'https://github.com/garrettogorman/jenkins-shared-terraform.git'])
+// library identifier: 'jenkins-shared-terraform@master', retriever: modernSCM(
+//   [$class: 'GitSCMSource',
+//    remote: 'https://github.com/garrettogorman/jenkins-shared-terraform.git'])
 
 
 def PROJECT = [
