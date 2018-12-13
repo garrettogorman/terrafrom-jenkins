@@ -3,7 +3,7 @@
 
 library identifier: 'custom-lib@master', retriever: modernSCM(
   [$class: 'GitSCMSource',
-   remote: 'https://github.com/garrettogorman/terrafrom-jenkins.git']
+   remote: 'https://github.com/garrettogorman/terrafrom-jenkins.git'])
 
 
 def PROJECT = [
