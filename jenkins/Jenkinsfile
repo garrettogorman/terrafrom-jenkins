@@ -34,6 +34,12 @@ pipeline {
 
   stages {
 
+        stage('PR - Dependencies') {
+        when {
+          target: 'master'
+        }
+        }
+
         stage('infrastructure') {
           agent {
             docker {
@@ -55,9 +61,10 @@ pipeline {
         }
   }
 
-  // post {
-  //   failure {
-  //     controlledFailure()
-  //   }
-  // }
+
 }
+
+
+// def infrastructure(String workspace, String blueprintDir) {
+//   def output = terraform("${env.SERVICE_NAME}-infrastructure-${workspace}", "${workspace}", "${blueprintDir}")
+// }
