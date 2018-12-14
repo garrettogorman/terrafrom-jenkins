@@ -1,5 +1,5 @@
 // Internal library imports
-@Library('shared-jenkins-library') _
+@Library('shared-jenkins-library@master') _
 
 
 // library identifier: 'jenkins-shared-terraform@master', retriever: modernSCM(
