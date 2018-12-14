@@ -8,7 +8,7 @@
 
 
 def PROJECT = [
-  name: 'terrafrom-jenkins',
+  name: 'jenkins',
   infrastructure: [
     environments: [
       development: [
