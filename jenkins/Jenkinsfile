@@ -1,5 +1,5 @@
 // Internal library imports
-@Library('shared-jenkins-library@master') _
+@Library('shared-jenkins-library') _
 
 
 // library identifier: 'jenkins-shared-terraform@master', retriever: modernSCM(
@@ -65,6 +65,6 @@ pipeline {
 }
 
 
-// def infrastructure(String workspace, String blueprintDir) {
-//   def output = terraform("${env.SERVICE_NAME}-infrastructure-${workspace}", "${workspace}", "${blueprintDir}")
-// }
+def infrastructure(String workspace, String blueprintDir) {
+  def output = terraform("${env.SERVICE_NAME}-infrastructure-${workspace}", "${workspace}", "${blueprintDir}")
+}
