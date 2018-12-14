@@ -44,7 +44,7 @@ pipeline {
           agent {
             docker {
               image 'hashicorp/terraform:light'
-              // args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+              args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
             }
           }
 
