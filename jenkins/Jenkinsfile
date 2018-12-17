@@ -55,7 +55,7 @@ pipeline {
           }
 
           steps {
-              echo 'RUNNING DEV STAGE'
+            //   echo 'RUNNING DEV STAGE'
               infrastructure('development', 'blueprint')
           }
       }
