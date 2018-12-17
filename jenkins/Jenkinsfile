@@ -34,31 +34,57 @@ pipeline {
 
   stages {
 
-        // stage('PR - Dependencies') {
-        // when {
-        //   target: 'master'
-        // }
-        // }
+      stage('infrastructure_developement') {
 
-        stage('infrastructure') {
+          when {
+              changeRequest target: 'master'
+          }
+
           agent {
-            docker {
-              image 'hashicorp/terraform:light'
-              args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
-            }
+              docker {
+                  image 'hashicorp/terraform:light'
+                  args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+              }
           }
 
           environment {
-                TF_VAR_projectcode = "8675309"
-                TF_VAR_vpc_cidr = "172.16.0.0/16"
-                TF_VAR_public_subnet_count = "2"
-                TF_VAR_private_subnet_count = "2"
+              TF_VAR_projectcode = "8675309"
+              TF_VAR_vpc_cidr = "172.16.0.0/16"
+              TF_VAR_public_subnet_count = "2"
+              TF_VAR_private_subnet_count = "2"
           }
 
           steps {
-            infrastructure('development', 'blueprint')
+              infrastructure('development', 'blueprint')
           }
-        }
+      }
+
+
+
+      stage('infrastructure_production') {
+
+          when {
+              target: 'master'
+          }
+
+          agent {
+              docker {
+                  image 'hashicorp/terraform:light'
+                  args "--entrypoint '' -v /etc/passwd:/etc/passwd -v /var/lib/jenkins/.ssh:/var/lib/jenkins/.ssh"
+              }
+          }
+
+          environment {
+              TF_VAR_projectcode = "8675309"
+              TF_VAR_vpc_cidr = "172.16.0.0/16"
+              TF_VAR_public_subnet_count = "2"
+              TF_VAR_private_subnet_count = "2"
+          }
+
+          steps {
+              infrastructure('production', 'blueprint')
+          }
+      }
   }
 
 
