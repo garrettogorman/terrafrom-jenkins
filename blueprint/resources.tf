@@ -32,6 +32,7 @@ module "vpc" {
 
   tags = {
     Environment = "test-${terraform.workspace}"
+    Branch = "${terraform.workspace}"
   }
 }
 
